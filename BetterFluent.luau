@@ -13,8 +13,18 @@ local function requireModule(path, localObj)
         end
 end
 
-local Icons          = requireModule("icons/icons.luau", script.Parent.icons.icons)
-local Config         = requireModule("config.luau", script:FindFirstChild("config") or "config")
+
+local Icons
+pcall(function()
+        Icons = requireModule("icons/icons.luau", script.Parent.icons and script.Parent.icons.icons)
+end)
+local function getIcon(name)
+        if Icons and Icons.assets then
+                return Icons.assets[name] or ""
+        end
+        return ""
+end
+local Config         = requireModule("config.luau", (script:FindFirstChild("config") or "config"))
 local Window         = Fluent:CreateWindow(Config)
 local Tabs           = {
         Main         = Window:AddTab({ Title = "Main", Icon = getIcon("lucide-home") }),
@@ -179,18 +189,20 @@ local buttons        = createButtons(Tabs.Main, {
 local paragraphs     = createParagraphs(Tabs.Main, {
         { k = "Example", t = "Paragraph", c = "This is a paragraph.\nSecond line!" }
 })
-local keybinds       = createKeybinds(Tabs.Main, {
+local keybinds
+keybinds = createKeybinds(Tabs.Main, {
         { k = "Keybind", t = "KeyBind", m = "Toggle", df = "LeftControl",
                 cb  = function(v) print("Keybind clicked!", v) end,
                 ccb = function(n) print("Keybind changed!", n) end,
-                oc  = function() print("Keybind clicked:", keybinds.Keybind:GetState()) end,
-                och = function() print("Keybind changed:", keybinds.Keybind.Value) end
+                oc  = function() print("Keybind clicked:", keybinds and keybinds.Keybind and keybinds.Keybind:GetState() or "nil") end,
+                och = function() print("Keybind changed:", keybinds and keybinds.Keybind and keybinds.Keybind.Value or "nil") end
         }
 })
-local inputs         = createInputs(Tabs.Main, {
+local inputs
+inputs = createInputs(Tabs.Main, {
         { k = "Input", t = "Input", df = "Default", p = "Placeholder", n = false, f = false,
                 cb  = function(v) print("Input changed:", v) end,
-                och = function() print("Input updated:", inputs.Input.Value) end
+                och = function() print("Input updated:", inputs and inputs.Input and inputs.Input.Value or "nil") end
         }
 })
 local sliders        = createSliders(Tabs.Main, {
@@ -200,19 +212,27 @@ local sliders        = createSliders(Tabs.Main, {
                 sv  = 3
         }
 })
-local colorpickers   = createColorpickers(Tabs.Main, {
+local colorpickers
+colorpickers = createColorpickers(Tabs.Main, {
         { k = "Colorpicker", t = "Colorpicker", df = Color3.fromRGB(96, 205, 255),
-                och = function() print("Colorpicker changed:", colorpickers.Colorpicker.Value) end,
+                och = function()
+                        print("Colorpicker changed:", colorpickers and colorpickers.Colorpicker and colorpickers.Colorpicker.Value or "nil")
+                end,
                 sv  = Color3.fromRGB(0, 255, 140)
         },
         { k = "TransparencyColorpicker", t = "Colorpicker", d = "but you can change the transparency.", tr = 0, df = Color3.fromRGB(96, 205, 255),
-                och = function() print("TColorpicker changed:", colorpickers.TransparencyColorpicker.Value, "Transparency:", colorpickers.TransparencyColorpicker.Transparency) end
+                och = function()
+                        print("TColorpicker changed:",
+                                colorpickers and colorpickers.TransparencyColorpicker and colorpickers.TransparencyColorpicker.Value or "nil",
+                                "Transparency:",
+                                colorpickers and colorpickers.TransparencyColorpicker and colorpickers.TransparencyColorpicker.Transparency or "nil"
+                        )
+                end
         }
 })
 
 --[[
 ===============================================================================
         ADD YOUR CUSTOM CODE ABOVE THIS LINE!
-        Or edit the values above, start Line 145
 ===============================================================================
 ]]
